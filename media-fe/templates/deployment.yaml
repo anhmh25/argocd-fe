@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+# abc:
+# {{- range .Values.lables }}
+#   - {{ . }}
+# {{- end}}
+metadata:
+  name: {{ include "helm.fullname" . }}
+  labels:
+    {{- include "helm.labels" . | nindent 4 }}
+    {{- with .Values.lables }}
+    {{- toYaml . | nindent 4}}
+    {{- end }}
+  namespace: {{ include "helm.namespace" .}}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "helm.selectorLabels" . | nindent 6 }}
+      {{- with .Values.lables }}
+      {{- toYaml . | nindent 6}}
+      {{- end }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "helm.labels" . | nindent 8 }}
+        {{- with .Values.lables }}
+        {{- toYaml . | nindent 8}}
+        {{- end }}
+	      {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          - name: {{ .Values.env.nameDbUri }}
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.secret.name }}
+                key: {{ .Values.env.nameKeySecret }}
