@@ -14,7 +14,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/hiepzinza/argocd-fe.git
+    repoURL: https://github.com/anhmh25/argocd-fe.git
     targetRevision: main
     path: media-fe
     helm:
